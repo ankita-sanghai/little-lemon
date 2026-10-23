@@ -6,9 +6,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.littlelemon.AppDatabase
 
 @Composable
-fun Navigation(navController: NavHostController) {
+fun Navigation(navController: NavHostController, database: AppDatabase) {
     val context = LocalContext.current
     val prefs = context.getSharedPreferences("LittleLemon", Context.MODE_PRIVATE)
     val isLoggedIn = !prefs.getString("email", "").isNullOrBlank()
