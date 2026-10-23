@@ -6,6 +6,18 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import java.util.Locale
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -70,7 +82,7 @@ fun HomeContent(navController: NavHostController, menuItems: List<MenuItemRoom>)
                 modifier = Modifier
                     .size(48.dp)
                     .align(Alignment.CenterEnd)
-                    .clickable { navController.navigate(ProfileDestination.route) }
+                    .clickable { navController.navigate(Profile.route) }
             )
         }
 
@@ -162,4 +174,116 @@ fun HomePreview() {
             MenuItemRoom(1, "Greek Salad", "The famous greek salad of crispy lettuce, peppers, olives.", 12.99, "", "starters")
         )
     )
+}
+
+@Composable
+fun HomeContent(navController: NavHostController, menuItems: List<MenuItemRoom>) {
+    var searchPhrase by remember { mutableStateOf("") }
+    var selectedCategory by remember { mutableStateOf<String?>(null) }
+
+    val categories = menuItems.map { it.category }.distinct()
+
+    val filteredItems = menuItems
+        .filter { selectedCategory == null || it.category == selectedCategory }
+        .filter { searchPhrase.isBlank() || it.title.contains(searchPhrase, ignoreCase = true) }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        // Header
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.logo),
+                contentDescription = "Little Lemon logo",
+                modifier = Modifier
+                    .height(48.dp)
+                    .align(Alignment.Center)
+            )
+            Image(
+                painter = painterResource(id = R.drawable.profile),
+                contentDescription = "Profile",
+                modifier = Modifier
+                    .size(48.dp)
+                    .align(Alignment.CenterEnd)
+                    .clickable { navController.navigate(ProfileDestination.route) }
+            )
+        }
+
+        // Hero section
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color(0xFF495E57))
+                .padding(16.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Little Lemon",
+                        color = Color(0xFFF4CE14),
+                        fontSize = 40.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(text = "Chicago", color = Color.White, fontSize = 24.sp)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "We are a family-owned Mediterranean restaurant, focused on traditional recipes served with a modern twist",
+                        color = Color.White,
+                        fontSize = 16.sp
+                    )
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                Image(
+                    painter = painterResource(id = R.drawable.heroimage),
+                    contentDescription = "Hero image",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(120.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            TextField(
+                value = searchPhrase,
+                onValueChange = { searchPhrase = it },
+                placeholder = { Text("Enter search phrase") },
+                leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = "") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        // Menu breakdown
+        Text(
+            text = "ORDER FOR DELIVERY!",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp)
+        )
+        Row(
+            modifier = Modifier
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            categories.forEach { category ->
+                val selected = category == selectedCategory
+                Button(
+                    onClick = { selectedCategory = if (selected) null else category },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (selected) Color(0xFFF4CE14) else Color(0xFFEDEFEE),
+                        contentColor = Color.Black
+                    ),
+                    modifier = Modifier.padding(end = 8.dp)
+                ) {
+                    Text(category.replaceFirstChar { it.titlecase(Locale.getDefault()) })
+                }
+            }
+        }
+
+        MenuItems(filteredItems)
+    }
 }
